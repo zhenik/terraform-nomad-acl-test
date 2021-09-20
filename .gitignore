@@ -1,0 +1,5 @@
+.idea
+.minio.sys
+.terraform
+.vagrant
+*loc
