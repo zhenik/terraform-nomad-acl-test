@@ -3,13 +3,14 @@ provider "vault" {
   address = "http://127.0.0.1:8200"
 }
 
-module "nomad" {
-  source = "./terraform-vsphere-nomad"
+module "some_dependency" {
+  source = "./terraform-some-dependency"
+//  wait_time = "1s"
 }
 
 data "vault_generic_secret" "nomad_bootstrap_token" {
   depends_on = [
-    module.nomad
+    module.some_dependency
   ]
 //  disable_read = true
   path = "secret/example/nomad-bootstrap-token"
