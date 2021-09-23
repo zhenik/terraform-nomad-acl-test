@@ -2,30 +2,32 @@ provider "vault" {
   token = "master"
   address = "http://127.0.0.1:8200"
 }
+
+module "nomad" {
+  source = "./terraform-vsphere-nomad"
+}
+
 data "vault_generic_secret" "nomad_bootstrap_token" {
+  depends_on = [
+    module.nomad
+  ]
+//  disable_read = true
   path = "secret/example/nomad-bootstrap-token"
 }
+
+# Configure the Nomad provider
 provider "nomad" {
-  alias = "bootstrap_token"
-  secret_id = data.vault_generic_secret.nomad_bootstrap_token.data["secret-id"]
+  alias     = "bootstrap_token"
   address = "http://127.0.0.1:4646"
+  secret_id = data.vault_generic_secret.nomad_bootstrap_token.data["secret-id"]
 }
-
-locals {
-  nomad_backend_name = "test1"
+resource "nomad_acl_policy" "dev" {
+  provider = nomad.bootstrap_token
+  name        = "tezt1"
+  description = "Submit jobs to the dev environment."
+  rules_hcl = <<EOT
+namespace "dev" {
+  policy = "write"
 }
-
-module "dummy_secrets" {
-  providers = {
-    nomad = nomad.bootstrap_token
-  }
-  source = "./terraform-vault-dummy-secrets"
-  nomad_backend_name = local.nomad_backend_name
-}
-
-module "nomad_vault_acl_config" {
-  source = "./terraform-vault-nomad-backend-config"
-  nomad_backend_name = local.nomad_backend_name
-  nomad_acl_management_token = module.dummy_secrets.nomad_acl_token_out.secret_id
-  nomad_address_port = "http://127.0.0.1:4646"
+EOT
 }
