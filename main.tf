@@ -12,7 +12,6 @@ data "vault_generic_secret" "nomad_bootstrap_token" {
   depends_on = [
     module.some_dependency
   ]
-//  disable_read = true
   path = "secret/example/nomad-bootstrap-token"
 }
 
