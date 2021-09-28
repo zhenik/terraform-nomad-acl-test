@@ -23,7 +23,7 @@ provider "nomad" {
 }
 
 resource "nomad_acl_token" "nomad_management_token" {
-  provider = "nomad.bootstrap_token"
+  provider = nomad.bootstrap_token
   name = "vault-nomad-management-token-13"
   type = "management"
 }
